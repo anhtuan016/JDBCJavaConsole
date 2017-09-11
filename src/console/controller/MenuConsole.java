@@ -5,6 +5,7 @@
  */
 package console.controller;
 
+import FileHandle.StudentFileHandle;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -20,8 +21,10 @@ public class MenuConsole {
             System.out.println("1.Student List");
             System.out.println("2.Add student");
             System.out.println("3.Edit Student");
-            System.out.println("4. Delete Student");
-            System.out.println("5. Exit");
+            System.out.println("4.Delete Student");
+            System.out.println("5.Export to FILE");
+            System.out.println("6.Import from FILE");
+            System.out.println("7.Exit");
             System.out.println("===========================================");
             System.out.print("You choose: ");
             Scanner scanner = new Scanner(System.in);
@@ -37,14 +40,14 @@ public class MenuConsole {
                 continue;
             }
             StudentController studentController = new StudentController();
-            if (choice == 5) {
+            StudentFileHandle studentFileHandle = new StudentFileHandle();
+            if (choice == 7) {
                 studentController.Exit();
                 break;
             } else {
                 switch (choice) {
                     case 1:
-                        studentController.getList();
-
+                        studentController.showList();
                         break;
                     case 2:
                         studentController.addStudent();
@@ -54,6 +57,12 @@ public class MenuConsole {
                         break;
                     case 4:
                         studentController.deleteStudent();
+                        break;
+                    case 5:
+                        studentFileHandle.exportToFile();
+                        break;
+                    case 6:
+                        studentFileHandle.importFile();
                         break;
                     default:
                         System.out.println("");

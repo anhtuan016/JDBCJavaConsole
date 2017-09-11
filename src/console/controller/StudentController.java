@@ -5,11 +5,17 @@
  */
 package console.controller;
 
+import FileHandle.StudentFileHandle;
 import console.model.StudentModel;
 import java.util.Scanner;
 import console.entity.Student;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class StudentController {
 
@@ -19,16 +25,19 @@ public class StudentController {
     //4.delete.
     StudentModel studentModel = new StudentModel();
 
-    public void getList() throws SQLException {
-        ResultSet rs = null;
-        rs = studentModel.getList();
-        while (rs.next()) {
-            System.out.println("ID: " + rs.getLong("id") + "\nName: " + rs.getString("name") + "\nEmail: " + rs.getString("email"));
+    public void showList() throws SQLException {
+        ArrayList<Student> list;
+        list = studentModel.getList();
+        for (Student student : list) {
+            System.out.println("id: " + student.getId());
+            System.out.println("name: " + student.getName());
+            System.out.println("email: " + student.getEmail());
         }
+
     }
+
     //Nhận dữ liệu từ người dùng
     //Validate dữ liệu, tiến hành lưu thông tin.
-
     public void addStudent() throws SQLException {
         Scanner sc = new Scanner(System.in);
         System.out.println("Please enter student information");
@@ -36,7 +45,7 @@ public class StudentController {
         String name = sc.nextLine();
         System.out.println("Please enter email: ");
         String email = sc.nextLine();
-        System.out.println("Name:  " + name + " email: " + email);
+        System.out.println("Name:  " + name + " \nemail: " + email);
         //Validate here
         Student student = new Student();
         student.setName(name);
@@ -58,16 +67,38 @@ public class StudentController {
             System.err.println("You did not enter a valid number!");
             return;
         }
+        Student student = studentModel.getStudentById(id);
+        if (student != null) {
+            System.out.println("Student Found!!!");
+            System.out.println("======================");
+            System.out.println("ID: " + student.getId());
+            System.out.println("Name: " + student.getName());
+            System.out.println("Email: " + student.getEmail());
+            System.out.print("Do you really want to edit this student(Y/N)?: ");
+            String choice = sc.nextLine();
+            switch (choice) {
+                case "Y":
+                    System.out.print("Enter new Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("\nEnter new Email: ");
+                    String email = sc.nextLine();
+                    student.setId(System.currentTimeMillis());
+                    student.setName(name);
+                    student.setEmail(email);
+                    studentModel.edit(id, student);
+                    break;
+                case "N":
+                    System.out.println("Cancelled");
+                    break;
+                default:
+                    System.out.println("===============");
+                    System.out.println("Wrong Key Pressed");
+            }
+        } else {
+            System.out.println("====================");
+            System.out.println("Student not found!!!");
+        }
 
-        System.out.print("Enter new name you want to change: ");
-        String name = sc.nextLine();
-        System.out.print("\nEnter new Email you want to change: ");
-        String email = sc.nextLine();
-        Student studentEdited = new Student();
-        studentEdited.setName(name);
-        studentEdited.setEmail(email);
-        studentEdited.setId(System.currentTimeMillis());
-        studentModel.edit(id, studentEdited);
     }
 
     public void deleteStudent() throws SQLException {
@@ -78,11 +109,37 @@ public class StudentController {
             id = Long.parseLong(sc.nextLine());
         } catch (NumberFormatException e) {
             System.err.println("You did not enter a valid number!!!");
-            return;
+
         }
-        studentModel.delete(id);
+        //Use ID to get the Student from Database.
+        Student student = studentModel.getStudentById(id);
+        if (student != null) {
+            System.out.println("Student Found: ");
+            System.out.println("============================");
+            System.out.println("ID: " + student.getId());
+            System.out.println("Name: " + student.getName());
+            System.out.println("Email: " + student.getEmail());
+            System.out.print("Do you really want to delete this student(Y/N)?: ");
+
+            String choice = sc.nextLine();
+            switch (choice) {
+                case "Y":
+                    studentModel.delete(id);
+                    break;
+                case "N":
+                    System.out.println("Cancelled");
+                    break;
+                default:
+                    System.out.println("Wrong key (Y/N must be UPPERCASE)!!!");
+            }
+        } else {
+            System.err.println("Student not found!!!");
+
+        }
 
     }
+
+ 
 
     public void Exit() {
         studentModel.closeConnection();
